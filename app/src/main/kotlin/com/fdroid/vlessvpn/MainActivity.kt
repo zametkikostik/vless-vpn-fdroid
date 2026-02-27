@@ -1,10 +1,12 @@
 package com.fdroid.vlessvpn
 
 import android.os.Bundle
-import androidx.activity.viewModels
+import android.view.View
+import android.widget.Button
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.fdroid.vlessvpn.databinding.ActivityMainBinding
 import kotlinx.coroutines.launch
 
 /**
@@ -13,20 +15,31 @@ import kotlinx.coroutines.launch
  */
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityMainBinding
-    private val vpnViewModel: VpnViewModel by viewModels()
+    private lateinit var vpnViewModel: VpnViewModel
+    private lateinit var statusText: TextView
+    private lateinit var connectButton: Button
+    private lateinit var scanButton: Button
+    private lateinit var serverCountText: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        setContentView(R.layout.activity_main)
+
+        // Initialize views
+        statusText = findViewById(R.id.statusText)
+        connectButton = findViewById(R.id.connectButton)
+        scanButton = findViewById(R.id.scanButton)
+        serverCountText = findViewById(R.id.serverCountText)
+
+        // Initialize ViewModel
+        vpnViewModel = VpnViewModel(application)
 
         setupUI()
         observeViewModel()
     }
 
     private fun setupUI() {
-        binding.connectButton.setOnClickListener {
+        connectButton.setOnClickListener {
             if (vpnViewModel.isConnected.value == true) {
                 vpnViewModel.disconnect()
             } else {
@@ -34,12 +47,9 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        binding.scanButton.setOnClickListener {
+        scanButton.setOnClickListener {
             vpnViewModel.scanServers()
-        }
-
-        binding.settingsButton.setOnClickListener {
-            // Open settings
+            Toast.makeText(this, "Scanning servers...", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -49,11 +59,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         vpnViewModel.statusMessage.observe(this) { message ->
-            binding.statusText.text = message
+            statusText.text = message
         }
 
         vpnViewModel.serverCount.observe(this) { count ->
-            binding.serverCountText.text = "Servers: $count"
+            serverCountText.text = "Servers: $count"
         }
 
         lifecycleScope.launch {
@@ -63,13 +73,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateConnectionState(connected: Boolean) {
         if (connected) {
-            binding.connectButton.text = "Disconnect"
-            binding.connectButton.setBackgroundColor(getColor(android.R.color.holo_red_dark))
-            binding.statusText.text = "Connected"
+            connectButton.text = "Disconnect"
+            connectButton.setBackgroundColor(getColor(android.R.color.holo_red_dark))
+            statusText.text = "Connected"
         } else {
-            binding.connectButton.text = "Connect"
-            binding.connectButton.setBackgroundColor(getColor(android.R.color.holo_green_dark))
-            binding.statusText.text = "Disconnected"
+            connectButton.text = "Connect"
+            connectButton.setBackgroundColor(getColor(android.R.color.holo_green_dark))
+            statusText.text = "Disconnected"
         }
     }
 

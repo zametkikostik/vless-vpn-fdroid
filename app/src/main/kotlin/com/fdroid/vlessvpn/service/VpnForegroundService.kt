@@ -5,6 +5,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
@@ -13,8 +14,7 @@ import com.fdroid.vlessvpn.MainActivity
 import com.fdroid.vlessvpn.R
 
 /**
- * Foreground Service for VPN - F-Droid compatible
- * Required for Android 12+ background service restrictions
+ * Foreground Service for VPN
  */
 class VpnForegroundService : Service() {
 

@@ -15,21 +15,15 @@ import androidx.core.app.NotificationCompat
 import com.fdroid.vlessvpn.MainActivity
 import com.fdroid.vlessvpn.R
 import com.fdroid.vlessvpn.VlessServer
-import java.io.FileDescriptor
-import java.net.DatagramSocket
-import java.net.InetSocketAddress
 
 /**
  * VLESS VPN Service - F-Droid compatible
- * Implements Android VpnService for system-wide VPN
  */
 class VpnService : Service() {
 
     companion object {
         private const val NOTIFICATION_CHANNEL_ID = "vless_vpn_channel"
         private const val NOTIFICATION_ID = 1001
-        private const val VPN_ADDRESS = "10.0.0.2"
-        private const val VPN_DNS = "8.8.8.8"
 
         fun start(context: Context, server: VlessServer) {
             val intent = Intent(context, VpnService::class.java).apply {
@@ -82,52 +76,23 @@ class VpnService : Service() {
 
     private fun startVpn(server: VlessServer) {
         currentServer = server
-
-        // Start foreground with notification
         val notification = createNotification()
         startForeground(NOTIFICATION_ID, notification)
-
-        // Setup VPN interface
         setupVpnInterface()
-
-        // Start connection in background
-        Thread {
-            connectToServer(server)
-        }.start()
     }
 
     private fun setupVpnInterface() {
         try {
-            val builder = Builder()
-                .addAddress(VPN_ADDRESS, 24)
-                .addDnsServer(VPN_DNS)
+            val builder = VpnService.Builder()
+                .addAddress("10.0.0.2", 24)
+                .addDnsServer("8.8.8.8")
                 .addRoute("0.0.0.0", 0)
                 .setSession("VLESS VPN")
                 .setMtu(1500)
 
-            // Add apps that should go through VPN (optional)
-            // builder.addAllowedApplication("com.android.chrome")
-
             vpnInterface = builder.establish()
         } catch (e: Exception) {
             // Handle error
-        }
-    }
-
-    private fun connectToServer(server: VlessServer) {
-        // Simplified connection logic for F-Droid compatibility
-        // In production, this would implement full VLESS protocol
-        try {
-            val socket = DatagramSocket()
-            socket.connect(InetSocketAddress(server.host, server.port), 10000)
-
-            // Send keepalive
-            val keepalive = byteArrayOf(0x00, 0x00, 0x00, 0x01)
-            socket.send(java.net.DatagramPacket(keepalive, keepalive.size))
-
-            socket.close()
-        } catch (e: Exception) {
-            // Connection failed
         }
     }
 
@@ -174,9 +139,7 @@ class VpnService : Service() {
         }
     }
 
-    override fun onBind(intent: Intent?): IBinder? {
-        return null
-    }
+    override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
         super.onDestroy()

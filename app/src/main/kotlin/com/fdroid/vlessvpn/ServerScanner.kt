@@ -6,12 +6,13 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
-import java.util.regex.Pattern
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 /**
  * Server Scanner - F-Droid compatible
  * Scans VLESS servers from public sources
- * No proprietary dependencies
  */
 class ServerScanner {
 
@@ -38,7 +39,9 @@ class ServerScanner {
         sources.forEach { source ->
             try {
                 val servers = fetchSource(source)
-                allServers.addAll(servers)
+                if (servers.isNotEmpty()) {
+                    allServers.addAll(servers)
+                }
             } catch (e: Exception) {
                 // Skip failed sources
             }
@@ -46,7 +49,7 @@ class ServerScanner {
 
         // Remove duplicates
         allServers.distinctBy { "${it.host}:${it.port}" }
-            .take(200) // Limit for performance
+            .take(200)
     }
 
     private fun fetchSource(urlString: String): List<VlessServer> {
@@ -154,17 +157,15 @@ class ServerScanner {
     }
 
     private fun parseParams(params: String): Map<String, String> {
-        return params.split('&').associateNotNull { param ->
-            val eqIndex = param.indexOf('=')
-            if (eqIndex == -1) return@associateNotNull null
-            val key = param.substring(0, eqIndex)
-            val value = java.net.URLDecoder.decode(param.substring(eqIndex + 1), "UTF-8")
-            key to value
-        }
-    }
-
-    private fun <K, V> Sequence<Pair<K, V>>.associateNotNull(): Map<K, V> {
-        return filter { it.first != null && it.second != null }.toMap()
+        return params.split('&')
+            .mapNotNull { param ->
+                val eqIndex = param.indexOf('=')
+                if (eqIndex == -1) return@mapNotNull null
+                val key = param.substring(0, eqIndex)
+                val value = java.net.URLDecoder.decode(param.substring(eqIndex + 1), "UTF-8")
+                key to value
+            }
+            .toMap()
     }
 
     private fun detectCountry(name: String): String {
@@ -188,8 +189,8 @@ class ServerScanner {
             val latency = System.currentTimeMillis() - startTime
             server.latency = latency.toInt()
             server.isWorking = true
-            server.checkedAt = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault())
-                .format(java.util.Date())
+            server.checkedAt = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+                .format(Date())
 
             true
         } catch (e: Exception) {
@@ -197,13 +198,4 @@ class ServerScanner {
             false
         }
     }
-}
-
-// Extension function for filtering nulls
-inline fun <T, K, V> Iterable<T>.mapNotNull(transform: (T) -> Pair<K, V>?): Map<K, V> {
-    return mapNotNull(transform).toMap()
-}
-
-inline fun <K, V> Sequence<Pair<K, V>>.associateNotNull(): Map<K, V> {
-    return filter { it.first != null && it.second != null }.toMap()
 }
