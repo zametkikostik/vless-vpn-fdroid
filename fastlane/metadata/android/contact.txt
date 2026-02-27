@@ -1,0 +1,20 @@
+# Contact Information for F-Droid
+
+## Developer Details
+- **Name:** Anonymous Developer
+- **Email:** (Not provided - privacy focused)
+- **Website:** https://github.com/zametkikostik/vless-vpn-client
+
+## Support
+- **Issue Tracker:** https://github.com/zametkikostik/vless-vpn-client/issues
+- **Source Code:** https://github.com/zametkikostik/vless-vpn-client
+
+## Privacy Note
+This is a privacy-focused application. No personal information is collected from users.
+Developer contact information is intentionally minimal to protect privacy.
+
+## Build Information
+- **Build Type:** Reproducible
+- **Dependencies:** All open-source (F-Droid compatible)
+- **Proprietary Dependencies:** None
+- **Tracking/Analytics:** None
